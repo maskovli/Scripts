@@ -5,6 +5,7 @@ This repo is where I will be uploading most of my scripts from when I work on di
 
 Make sure to test successfully before putting them into production environments.
 
+THE SCRIPTS IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND.
 
 # Other great git repositories:
 
