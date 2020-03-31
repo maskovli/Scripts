@@ -9,3 +9,7 @@ Make sure to test successfully before putting them into production environments.
 # Other great git repositories:
 
 - https://github.com/maskovli/IntuneDocs
+
+# Contact me on Twitter if you have any questions:
+
+- @MariusSkovli (https://twitter.com/MariusSkovli)
