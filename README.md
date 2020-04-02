@@ -9,7 +9,7 @@ THE SCRIPTS IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND.
 
 # Other great git repositories:
 
-- https://github.com/maskovli/IntuneDocs
+- https://github.com/MicrosoftDocs/IntuneDocs
 
 # Contact me on Twitter if you have any questions:
 
