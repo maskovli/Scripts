@@ -3,7 +3,7 @@
 Set the Variables needed for the operation
 #>
 
-$LabVMName = "BODØ-CLIENT-01"
+$LabVMName = "LAB-CLIENT-01"
 $LabVMPath = "C:\VMs\$LabVMName"
 $Time = "Get-Date"
 $ISO = "C:\Lab\Image\ISO\Windows\Win10_1909\Win10_Custom.iso"
