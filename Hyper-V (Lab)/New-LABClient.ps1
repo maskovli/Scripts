@@ -1,3 +1,16 @@
+<#	
+	.NOTES
+	===========================================================================
+	 Created on:   	13.05.2019
+	 Created by:   	Marius A. Skovli
+	 Filename:     	
+	===========================================================================
+	.DESCRIPTION
+        Run script section by section.
+        TIP: Add the autounattend.xml to the ISO in order to automate the process entierly. 
+#>
+
+
 
 <#
 Set the Variables needed for the operation
