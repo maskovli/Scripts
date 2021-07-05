@@ -16,7 +16,7 @@
 Get-NetAdapter
 Get-NetNat | Remove-NetNat
 Get-NetIPAddress
-Remove-NetNat -Name "redd0g.com"
+Remove-NetNat -Name "redd0g"
 
 
 
@@ -24,7 +24,7 @@ Remove-NetNat -Name "redd0g.com"
 #Redd0g.com (Example 1)
 New-VMSwitch -SwitchName "Redd0g" -SwitchType Internal
 $Redd0gComIfIndex = Get-NetAdapter "*redd0g*" | select ifIndex
-New-NetIPAddress -IPAddress 192.168.11.1 -PrefixLength 24 -InterfaceIndex 58
+New-NetIPAddress -IPAddress 192.168.11.1 -PrefixLength 24 -InterfaceIndex 53
 New-NetNat -Name Redd0g -InternalIPInterfaceAddressPrefix 192.168.11.0/24
 
 
