@@ -1,0 +1,1 @@
+Remove-item "Registry::HKEY_CLASSES_ROOT\ms-msdt" -force -verbose

@@ -1,0 +1,161 @@
+<RuleCollection Type="Msi" EnforcementMode="NotConfigured">
+    <FilePublisherRule Id="b7af7102-efde-4369-8a89-7a6a392d1473" Name="(Default Rule) All digitally signed Windows Installer files" Description="Allows members of the Everyone group to run digitally signed Windows Installer files." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePublisherCondition PublisherName="*" ProductName="*" BinaryName="*">
+          <BinaryVersionRange LowSection="0.0.0.0" HighSection="*" />
+        </FilePublisherCondition>
+      </Conditions>
+    </FilePublisherRule>
+    <FilePathRule Id="5b290184-345a-4453-b184-45305f6d9a54" Name="(Default Rule) All Windows Installer files in %systemdrive%\Windows\Installer" Description="Allows members of the Everyone group to run all Windows Installer files located in %systemdrive%\Windows\Installer." UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="%WINDIR%\Installer\*" />
+      </Conditions>
+    </FilePathRule>
+    <FilePathRule Id="64ad46ff-0d71-4fa0-a30b-3f3d30c5433d" Name="(Default Rule) All Windows Installer files" Description="Allows members of the local Administrators group to run all Windows Installer files." UserOrGroupSid="S-1-5-32-544" Action="Allow">
+      <Conditions>
+        <FilePathCondition Path="*.*" />
+      </Conditions>
+    </FilePathRule>
+    <FileHashRule Id="05091303-0ab1-45d9-8818-ccd36710197a" Name="RFIDIFServer v1.3.26.0.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x2A78D1BD9304DB4468A82229948CC1F49BC1C78C4EF95C0F10B244D7BF6A97A5" SourceFileName="RFIDIFServer v1.3.26.0.msi" SourceFileLength="2617856" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="4df8b677-8637-4a86-8f69-59874906869e" Name="ComboWindows64.msi" Description="MPlus 8.2" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x3EE902BF50A7F7BC69783D2D24AC6DC7E4CC7D973B0D4E7A26A088497B68C6DF" SourceFileName="ComboWindows64.msi" SourceFileLength="92256256" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="5663ac24-0a7d-413e-accb-3ab7101c7b4d" Name="IDEASInstallation.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xC4AFD1B676AB830B0167A2211017C4D88AEBF043BEF8A32697AFD9C7DC12D592" SourceFileName="IDEASInstallation.msi" SourceFileLength="191965696" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="5721ba23-1ef0-45b0-8d91-0e0a90361a49" Name="hyena_license.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xCF0B4C3E81D490D03F50F5C44B7C68521807320E53596997B8362DFDCF6A8DD8" SourceFileName="hyena_license.msi" SourceFileLength="504832" />
+          <FileHash Type="SHA256" Data="0xDB855AC7AC79522D79035EA6E27DAF71DD4003C907AAB0B2FFF7FE3F18185206" SourceFileName="hyena_license.msi" SourceFileLength="544768" />
+          <FileHash Type="SHA256" Data="0x45B83919B417BD1837D4D9135071C193347AAFEC83721D88F4BE5D66B389F9FF" SourceFileName="hyena_license.msi" SourceFileLength="555008" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="5d5124a3-7cc4-4d00-8228-887c7fb6f536" Name="AddressSearchService-1.8.1.43451-x64.msi, BlobDbTestService-1.0.0.0-x86.msi, IpserverTransmobileInstaller-3.4.0.1-x64.msi, ..." Description="O=LOCUS PUBLIC SAFETY AS, L=SANDEFJORD, S=VESTFOLD, C=NO" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xC195A0D401BD33A5D21E09FCDDBF6ADBD31779AFA21EA243395D04C925702782" SourceFileName="AddressSearchService-1.8.1.43451-x64.msi" SourceFileLength="2215936" />
+          <FileHash Type="SHA256" Data="0x40BF481E731C9751BF3905A4B0A90DD00DA3D29DA96A559941E7A3F748920C65" SourceFileName="BlobDbTestService-1.0.0.0-x86.msi" SourceFileLength="2600960" />
+          <FileHash Type="SHA256" Data="0xAFF3B8B70FEF90DBAE1DF0A0ED5267383E6ED5BC5CF47E6E4B313A74B3F057AC" SourceFileName="IpserverTransmobileInstaller-3.4.0.1-x64.msi" SourceFileLength="5697536" />
+          <FileHash Type="SHA256" Data="0xDAD3D6246C3718CFB72A219B126DF5C42E5E0808B7289C7A354579F0CEB3D6B5" SourceFileName="SpiderService-1.1.0.21-x86.msi" SourceFileLength="4800512" />
+          <FileHash Type="SHA256" Data="0x5BAE2F1B96F0CD40EC543DCDCC04960EE1B17EB5C8011D9B5D9A27C5D042A3D2" SourceFileName="DataSimulator-8.4.5.1-x64.msi" SourceFileLength="8732672" />
+          <FileHash Type="SHA256" Data="0x2C4F02CA2C38BCE370A9C2A33C1E17BD7F72CC907B7C961EA285F55AE973BA14" SourceFileName="TransFireClient-8-8.9.9.10-x86.msi" SourceFileLength="16797696" />
+          <FileHash Type="SHA256" Data="0x367F26982F07FEFAE4F9FD49BA410CB04D53E1367C79E39E271DF00DCA3CCDA9" SourceFileName="TransFireServer8-8.9.9.10-x64.msi" SourceFileLength="12558336" />
+          <FileHash Type="SHA256" Data="0x24084CD7D7F304204BCF3F51735E654F1F41A63A37BF966850D86ED522D0F690" SourceFileName="TransMedClient-8-8.4.5.1-x64.msi" SourceFileLength="67489421" />
+          <FileHash Type="SHA256" Data="0x7EB395AF4DFF6505C769D3EEDC59F476EE7E47A012CE8AD73C76A9EEB66A8107" SourceFileName="TransMedSafeConService-8.4.5.1-x64.msi" SourceFileLength="2961408" />
+          <FileHash Type="SHA256" Data="0x03431CD013C58484222A45E7358F5EB47738EC32B118D8DCE2A7CFE5BF79FA64" SourceFileName="TransMedServer-8-8.4.5.3-x64.msi" SourceFileLength="9052160" />
+          <FileHash Type="SHA256" Data="0x585523B00FF0680BAE6949DC68A6A0B80F85E3325EEA5155FFDF14423E3FA696" SourceFileName="TransFireClient-8-8.9.8.0-x86.msi" SourceFileLength="16752640" />
+          <FileHash Type="SHA256" Data="0xED69022F0687F812B048F734046B7AEC91C12357BFDA62AF36741900B76B6074" SourceFileName="TransFireServer8-8.9.8.0-x64.msi" SourceFileLength="12505088" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="69042af5-b3ec-425c-b3b8-b6546aa1409f" Name="teams-bg.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xB52D1FBD8E1A01AABE20CDE4948DB62CAD4EEBE478F54D146A77C5289D2032AC" SourceFileName="teams-bg.msi" SourceFileLength="624640" />
+          <FileHash Type="SHA256" Data="0x0302480D248CD66A05338C51E6C1A809D368FEEA4670C03F143E2F0ACD866D8D" SourceFileName="teams-bg2.msi" SourceFileLength="624640" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="7b575afc-fd11-47cc-b2ea-6c3240d66495" Name="paup4-setup.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x0CD19748D62B47C7BE21651ABF6952D159BFE56F94BFAE1F2A1914F53308DD00" SourceFileName="paup4-setup.msi" SourceFileLength="4873216" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="8512545c-ecef-4b46-af3a-1a0c3e7a1e11" Name="sigmaplot_14_lic.msi, sigmaplot_lisensserver.msi" Description="Sigmaplot 14 lisensfil install" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xB1D61C45C96F8EFBEEC6DE721BDBE8482100B1BF7B6ECAC342EA01793B440146" SourceFileName="sigmaplot_14_lic.msi" SourceFileLength="520704" />
+          <FileHash Type="SHA256" Data="0xCA2F95962CCE06D74ACA7877B4A6C66FFCE5B0CB586CECE8E980CC9CA92D1EF6" SourceFileName="sigmaplot_lisensserver.msi" SourceFileLength="418304" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="a41052dd-ddf5-469e-b74a-c5b254b93262" Name="GPowerSetup.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xE3C0383339510D243BE026E5864EC97ADFFABBA3760C87C2CAB11A667719F6C5" SourceFileName="GPowerSetup.msi" SourceFileLength="6138880" />
+          <FileHash Type="SHA256" Data="0x701A6665468D1B95A09B7249D52EE3BFF41406A701D6978FD314CD2972DF0CE7" SourceFileName="GPowerSetup.msi" SourceFileLength="6074368" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="a73db1f4-ee7d-4bea-85d2-bbd0c9a41c19" Name="InsperaScanSetup.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x0E678A1B181C1124144E3671C3B553FCC63D09CC46769AE75CBDD60879D2A773" SourceFileName="InsperaScanSetup.msi" SourceFileLength="63766528" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="b2326f8d-0fae-4e38-b556-d70a3ac73502" Name="IDEAS-Installation-x64.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xAB581CABE6BB457D4CC60FC626C3B61B53B27BCA5CDBA0C9C7B8A253EC037FB2" SourceFileName="IDEAS-Installation-x64.msi" SourceFileLength="205143040" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="c086462e-72e5-4fa5-a629-de5d30d98e32" Name="MPlus ComboWindows64.msi" Description="Mplus" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x44005F0F9F136B0EFC712F0005CC80621C68636C8ACE31EB3170C0999F33A640" SourceFileName="ComboWindows64.msi" SourceFileLength="169377792" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="c167d0bb-be2a-41ac-831e-e8e1cfc757e4" Name="SNetTerm.msi" Description="Bibliotek" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x2D46C994C2A96C22A3EE7D0E3DB9284854598BA65EB5DA881E7EC09DEDAAF519" SourceFileName="SNetTerm.msi" SourceFileLength="6019072" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="c256b63b-efe0-4330-8517-97ad24728ad2" Name="RemoteClient v1.1.16.msi" Description="Bibliotecha" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x5D59B5AF044DFEB4B424A763049AE047CE399C328EC212220579DF4B4A4C7BC8" SourceFileName="RemoteClient v1.1.16.msi" SourceFileLength="2797568" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="d23cebaa-0623-4ad4-be22-638b0d542db3" Name="RFIDIF v1.3.26.0.msi" Description="RFID-plate Bibl /da03200733" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x380FE34F8E1F134A2605F14CB775C4AAE47D19AE230857AEEF2BB32D0B19D5A3" SourceFileName="RFIDIF v1.3.26.0.msi" SourceFileLength="3824640" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="d4956787-322e-4bb2-b36c-cbe203830ed1" Name="DAMBE.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0x581F77F546EE9DA8BA21842484595BD621C3BB8BE58E99FC70992EB965D2DAB0" SourceFileName="DAMBE.msi" SourceFileLength="52998656" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="f685731f-4cf3-4a83-876d-07d007c94d7d" Name="Feig OBID Driver v2.5.0.1-1.msi, RFIDIF v1.3.26.0.msi, RFIDIFServer v1.3.26.0.msi" Description="RFID_plate_Bibliotek /da03200733" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xB4BB1D721DF93E3EC0A9F9D7EFEB9B44DF11A3A298738A6964EA73DBF0C05BDB" SourceFileName="Feig OBID Driver v2.5.0.1-1.msi" SourceFileLength="1483264" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+    <FileHashRule Id="f836997f-22fe-4925-ad9a-50ecde0f8931" Name="combinezp.msi" Description="" UserOrGroupSid="S-1-1-0" Action="Allow">
+      <Conditions>
+        <FileHashCondition>
+          <FileHash Type="SHA256" Data="0xEC88A0328B4DC0BC4D4A8E3923007BB567746C357F42908FABD0BDD05F26B3F2" SourceFileName="combinezp.msi" SourceFileLength="10320896" />
+        </FileHashCondition>
+      </Conditions>
+    </FileHashRule>
+</RuleCollection>
