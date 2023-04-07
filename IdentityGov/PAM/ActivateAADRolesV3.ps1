@@ -23,20 +23,25 @@ Import-Module -Name AzureADPreview
 # Connect to Azure AD
 Connect-AzureAD
 
-# Get available roles and prompt the user to choose one or more
-$availableRoles = Get-AzureADMSPrivilegedRoleAssignment -All $true
+# Get available roles for the signed-in user
+$availableRoles = Get-AzureADMSPrivilegedRole -All $true | Where-Object { $_.IsElevatableByMyself -eq $true }
+
 Write-Host "Available roles:"
-$availableRoles | Select-Object -Property DisplayName, Id
-$selectedRoleIds = Read-Host "Enter comma-separated role Ids to activate"
+foreach ($role in $availableRoles) {
+    Write-Host "$($role.DisplayName) ($($role.Id))"
+}
 
-# Get the duration for which the role should be active
-$duration = Read-Host "Enter the duration for which the role should be active in minutes"
+# Prompt user to select role(s) to activate
+$selectedRoles = Read-Host "Enter the role IDs to activate, separated by commas"
+$selectedRoles = $selectedRoles -split ","
 
-# Get the justification for the activation
-$justification = Read-Host "Enter a justification for the activation"
+# Prompt user to provide justification
+$justification = Read-Host "Enter justification for the role assignment"
 
-# Activate the selected roles
-foreach ($roleId in $selectedRoleIds.Split(',')) {
-    $result = Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $roleId -RoleDefinitionId $roleId -Type 'adminAdd' -AssignmentState 'Active' -Duration ($duration) -Reason $justification
-    Write-Host "Activated role with Id: $roleId"
+# Prompt user to provide duration in minutes
+$duration = Read-Host "Enter the duration (in minutes) for the role assignment"
+
+foreach ($roleId in $selectedRoles) {
+    $result = Open-AzureADMSPrivilegedRoleAssignmentRequest -ProviderId 'aadRoles' -ResourceId $roleId -RoleDefinitionId $roleId -SubjectId (Get-AzureADSignedInUser).ObjectId -Type 'adminAdd' -AssignmentState 'Active' -DurationInMinutes $duration -Reason $justification
+    Write-Host "Activated role $($roleId)"
 }
