@@ -11,7 +11,7 @@
 #>
 
 # Define variables
-$LabVMName = "SH-CLIENT-05-PersonalEnv"
+$LabVMName = "SH-CLIENT-06"
 $LabVMPath = "D:\VMs\$LabVMName"
 $Time = Get-Date
 $ISO = "D:\iso\en-us_windows_11_business_editions_updated_may_2022_x64_dvd_f6700d97.iso"
