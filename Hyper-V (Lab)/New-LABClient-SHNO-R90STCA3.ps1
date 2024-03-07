@@ -11,11 +11,11 @@
 #>
 
 # Define variables
-$LabVMName = "TB-CLIENT-01"
-$LabVMPath = "C:\VMs\$LabVMName"
+$LabVMName = "SPV-FPAW-02"
+$LabVMPath = "D:\VMs\$LabVMName"
 $Time = Get-Date
-$ISO = "C:\VMS\iso\en-us_windows_10_business_editions_version_22h2_updated_june_2023_x64_dvd_ac6658bf.iso"
-$Switch = "Default Switch"
+$ISO = "D:\iso\nb-no_windows_11_business_editions_version_23h2_x64_dvd_9d18e125.iso"
+$Switch = "vLAN"
 
 # Create the VM
 try {
