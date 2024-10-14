@@ -1,0 +1,295 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "General overview",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "\nAuditLogs\n| where Category in (\"RoleManagement\", \"ResourceManagement\")\n| where OperationName == \"Add member to role completed (PIM activation)\"\n| extend \n    Role = tostring(parse_json(TargetResources[0]).displayName),\n    InitiatedByUser = tostring(parse_json(InitiatedBy.user).displayName)\n| where Role in (\"Global Administrator\", \"Owner\", \"Contributor\")\n| mv-apply AD = parse_json(AdditionalDetails) on (\n    where AD.key in (\"StartTime\", \"EndTime\", \"ExpirationTime\")\n    | summarize DetailsMap = make_bag(pack(tostring(AD.key), tostring(AD.value)))\n)\n| extend \n    StartTimeRaw = coalesce(DetailsMap.StartTime, DetailsMap.startTime),\n    ExpirationTimeRaw = coalesce(DetailsMap.EndTime, DetailsMap.ExpirationTime, DetailsMap.endTime, DetailsMap.expirationTime)\n| extend\n    StartTime = todatetime(StartTimeRaw),\n    ExpirationTime = todatetime(ExpirationTimeRaw)\n| where now() between (StartTime .. ExpirationTime)\n| summarize CurrentActivations = count() by Role\n| extend RoleLabel = strcat(Role, \" (\", tostring(CurrentActivations), \")\")\n| project RoleLabel, CurrentActivations\n| render piechart with (title=\"Current Activations for Global Administrator, Owner, and Contributor\")",
+              "size": 1,
+              "title": "Current Acitve Roles (Global Admin, Owner and Contributor)",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+              ],
+              "visualization": "piechart",
+              "chartSettings": {
+                "showLegend": true,
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Global Administrator (1)",
+                    "color": "redBright"
+                  },
+                  {
+                    "seriesName": "Contributor",
+                    "color": "green"
+                  },
+                  {
+                    "seriesName": "Owner (1)",
+                    "color": "blue"
+                  }
+                ]
+              },
+              "mapSettings": {
+                "locInfo": "LatLong",
+                "sizeSettings": "CurrentActivations",
+                "sizeAggregation": "Sum",
+                "legendMetric": "CurrentActivations",
+                "legendAggregation": "Sum",
+                "itemColorSettings": {
+                  "type": "heatmap",
+                  "colorAggregation": "Sum",
+                  "nodeColorField": "CurrentActivations",
+                  "heatmapPalette": "greenRed"
+                }
+              }
+            },
+            "customWidth": "40",
+            "name": "Current Acitve Roles (Global Admin, Owner and Contributor)",
+            "styleSettings": {
+              "maxWidth": "50",
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "SigninLogs\n| where TimeGenerated >= ago(1d)  // Past 24 hours\n| extend \n    Country = tostring(LocationDetails.countryOrRegion),\n    IPAddress = tostring(IPAddress),\n    SignInTime = TimeGenerated,\n    UserDisplayName = tostring(UserDisplayName),\n    UserPrincipalName = tostring(UserPrincipalName)\n| summarize \n    FirstSeen = min(SignInTime),\n    LastSeen = max(SignInTime),\n    arg_max(SignInTime, *)  // Get the entire row where SignInTime is maximum\nby UserPrincipalName, UserDisplayName\n| join kind=inner (\n    AuditLogs\n    | where OperationName == \"Add member to role completed (PIM activation)\"\n    | extend \n        UserPrincipalName = tostring(parse_json(InitiatedBy.user).userPrincipalName),\n        Role = tostring(parse_json(TargetResources[0]).displayName)\n    // Extract StartTime and ExpirationTime dynamically\n    | mv-apply AD = parse_json(AdditionalDetails) on (\n        where isnotempty(AD)\n        | summarize DetailsMap = make_bag(pack(tostring(AD.key), tostring(AD.value)))\n    )\n    | extend \n        StartTime = todatetime(coalesce(DetailsMap.StartTime, DetailsMap.startTime)),\n        ExpirationTime = todatetime(coalesce(DetailsMap.EndTime, DetailsMap.ExpirationTime, DetailsMap.endTime, DetailsMap.expirationTime))\n    | where now() between (StartTime .. ExpirationTime)\n    // Summarize roles per user\n    | summarize Roles = make_set(Role) by UserPrincipalName\n    // Convert Roles array to string\n    | extend RolesString = strcat_array(Roles, \", \")\n    // Add visual indicators to critical roles using nested replace_string functions\n    | extend RolesDisplay = replace_string(\n        replace_string(\n            replace_string(RolesString, \"Global Administrator\", \"🔴 Global Administrator\"),\n            \"Owner\", \"🔴 Owner\"),\n        \"Contributor\", \"🔴 Contributor\")\n) on UserPrincipalName\n// Define or redefine variables after the join\n| extend \n    FirstSeenFormatted = strcat(\"D: \", format_datetime(FirstSeen, 'dd.MM.yyyy'), \" T: \", format_datetime(FirstSeen, 'HH.mm')),\n    LastSeenFormatted = strcat(\"D: \", format_datetime(LastSeen, 'dd.MM.yyyy'), \" T: \", format_datetime(LastSeen, 'HH.mm')),\n    CountryIndicator = iff(Country == \"NO\", strcat(\"🟢 \", Country), strcat(\"🔴 \", Country))\n// Final projection\n| project \n    Name = UserDisplayName,\n    UserName = UserPrincipalName,\n    FirstSeen = FirstSeenFormatted,\n    LastSeen = LastSeenFormatted,\n    Country = CountryIndicator,\n    IPAddress,\n    Roles = RolesDisplay\n",
+              "size": 0,
+              "title": "Current signed-in Administrators",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+              ],
+              "visualization": "table",
+              "gridSettings": {
+                "rowLimit": 350
+              }
+            },
+            "customWidth": "100",
+            "name": "Current signed-in Administrators",
+            "styleSettings": {
+              "maxWidth": "100",
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 6",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "AuditLogs\n| where TimeGenerated >= ago(30d)\n| where Category == \"RoleManagement\"\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| extend \n    Role = tostring(parse_json(TargetResources[0]).displayName)\n| summarize Activations = count() by Role\n| sort by Activations desc\n| render columnchart\n",
+              "size": 0,
+              "title": "PIM Activations per Role - Last 30 Days (Entra Built-in Roles)",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+              ],
+              "chartSettings": {
+                "seriesLabelSettings": [
+                  {
+                    "seriesName": "Global Administrator",
+                    "color": "redBright"
+                  }
+                ]
+              }
+            },
+            "customWidth": "50",
+            "name": "PIM Activations per Role - Last 30 Days (Entra Built-in Roles) - Copy",
+            "styleSettings": {
+              "maxWidth": "50",
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "// Identify top roles\nlet TopRoles = AuditLogs\n| where TimeGenerated >= ago(30d)\n| where Category == \"ResourceManagement\"\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| extend Role = tostring(parse_json(TargetResources[0]).displayName)\n| summarize TotalActivations = count() by Role\n| top 5 by TotalActivations desc\n| project Role;\n\n// Use TopRoles in the main query\nAuditLogs\n| where TimeGenerated >= ago(30d)\n| where Category == \"ResourceManagement\"\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| extend Role = tostring(parse_json(TargetResources[0]).displayName)\n| extend Role = iif(Role in (TopRoles), Role, \"Other\")\n| summarize Activations = count() by Role\n| sort by Activations desc\n| render columnchart with (title=\"PIM Activations per Azure Resource Role - Last 30 Days\")\n",
+              "size": 0,
+              "title": "PIM Activations per Role - Last 30 Days (Azure Resource Roles)",
+              "color": "red",
+              "timeContext": {
+                "durationMs": 86400000
+              },
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces",
+              "crossComponentResources": [
+                "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+              ]
+            },
+            "customWidth": "50",
+            "name": "PIM Activations per Role - Last 30 Days (Azure Resource Roles)",
+            "styleSettings": {
+              "maxWidth": "50",
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "group - 7"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where Category == \"RoleManagement\"\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| where tostring(parse_json(TargetResources[0]).displayName) == \"Global Administrator\"\n| extend \n    User = tostring(parse_json(InitiatedBy.user).displayName),\n    Role = tostring(parse_json(TargetResources[0]).displayName),\n    RoleID = tostring(parse_json(TargetResources[0]).id),\n    Justification = ResultDescription,\n    StartTimeRaw = parse_json(AdditionalDetails[3]).value,\n    ExpirationTimeRaw = parse_json(AdditionalDetails[4]).value,\n    ActivationTime = TimeGenerated\n// Convert raw time strings to datetime\n| extend\n    StartTime = todatetime(StartTimeRaw),\n    ExpirationTime = todatetime(ExpirationTimeRaw)\n// Format the dates and times\n| extend\n    FormattedStart = strcat(\"D: \", format_datetime(StartTime, 'dd.MM.yyyy'), \" T: \", format_datetime(StartTime, 'HH.mm')),\n    FormattedExpiration = strcat(\"D: \", format_datetime(ExpirationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ExpirationTime, 'HH.mm'))\n// Create the ActivationRange with formatted times\n| extend\n    ActivationRange = strcat(FormattedStart, \" - \", FormattedExpiration)\n// Calculate RequestedHours\n| extend\n    RequestedHours = datetime_diff('hour', ExpirationTime, StartTime)\n// Format ActivationTime if needed\n| extend\n    ActivationTimeFormatted = strcat(\"D: \", format_datetime(ActivationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ActivationTime, 'HH.mm'))\n// Ensure ActivationTime is included in the project\n| project User, Role, RoleID, Justification, ActivationRange, RequestedHours, ActivationTime, ActivationTimeFormatted\n| order by ActivationTime desc\n",
+        "size": 4,
+        "title": "Global Administrator Activations  (High-Impact)",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "showRefreshButton": true,
+        "showExportToExcel": true,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+        ],
+        "visualization": "table"
+      },
+      "customWidth": "50",
+      "name": "Global Administrator Activations  (High-Impact)",
+      "styleSettings": {
+        "padding": "Wide",
+        "maxWidth": "50",
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where Category == \"RoleManagement\"\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n// No longer filtering on a specific role\n| extend \n    User = tostring(parse_json(InitiatedBy.user).displayName),\n    Role = tostring(parse_json(TargetResources[0]).displayName),\n    RoleID = tostring(parse_json(TargetResources[0]).id),\n    Justification = ResultDescription,\n    ActivationTime = TimeGenerated\n// Dynamically extract StartTime and ExpirationTime from AdditionalDetails\n| mv-apply AD = parse_json(AdditionalDetails) on (\n    where AD.key in (\"StartTime\", \"EndTime\", \"ExpirationTime\")\n    | summarize DetailsMap = make_bag(pack(tostring(AD.key), tostring(AD.value)))\n)\n// Use the extracted values\n| extend \n    StartTimeRaw = coalesce(DetailsMap.StartTime, DetailsMap.startTime),\n    ExpirationTimeRaw = coalesce(DetailsMap.EndTime, DetailsMap.ExpirationTime, DetailsMap.endTime, DetailsMap.expirationTime)\n// Convert to datetime\n| extend\n    StartTime = todatetime(StartTimeRaw),\n    ExpirationTime = todatetime(ExpirationTimeRaw)\n// Format the dates and times\n| extend\n    FormattedStart = strcat(\"D: \", format_datetime(StartTime, 'dd.MM.yyyy'), \" T: \", format_datetime(StartTime, 'HH.mm')),\n    FormattedExpiration = strcat(\"D: \", format_datetime(ExpirationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ExpirationTime, 'HH.mm'))\n// Create ActivationRange and calculate RequestedHours\n| extend\n    ActivationRange = strcat(FormattedStart, \" - \", FormattedExpiration),\n    RequestedHours = datetime_diff('hour', ExpirationTime, StartTime)\n// Format ActivationTime if needed\n| extend\n    ActivationTimeFormatted = strcat(\"D: \", format_datetime(ActivationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ActivationTime, 'HH.mm'))\n// Project final columns\n| project User, Role, RoleID, Justification, ActivationRange, RequestedHours, ActivationTime, ActivationTimeFormatted\n| order by ActivationTime desc\n",
+        "size": 4,
+        "title": "General Role Activations (Entra Built-in Roles)",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "showRefreshButton": true,
+        "showExportToExcel": true,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "sortBy": [
+            {
+              "itemKey": "User",
+              "sortOrder": 1
+            }
+          ]
+        },
+        "sortBy": [
+          {
+            "itemKey": "User",
+            "sortOrder": 1
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "General Role Activations (Entra Built-in Roles)",
+      "styleSettings": {
+        "padding": "Wide",
+        "maxWidth": "50",
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where Category == \"ResourceManagement\"  // Filter for Azure resource activations\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| where tostring(parse_json(TargetResources[0]).displayName) == \"Owner\"  // Filter for Owner role\n| extend \n    User = tostring(parse_json(InitiatedBy.user).displayName),\n    Role = tostring(parse_json(TargetResources[0]).displayName),\n    RoleID = tostring(parse_json(TargetResources[0]).id),\n    Justification = ResultDescription,\n    StartTimeRaw = parse_json(AdditionalDetails[3]).value,\n    ExpirationTimeRaw = parse_json(AdditionalDetails[4]).value,\n    ActivationTime = TimeGenerated\n| extend\n    StartTime = todatetime(StartTimeRaw),\n    ExpirationTime = todatetime(ExpirationTimeRaw)\n| extend\n    FormattedStart = strcat(\"D: \", format_datetime(StartTime, 'dd.MM.yyyy'), \" T: \", format_datetime(StartTime, 'HH.mm')),\n    FormattedExpiration = strcat(\"D: \", format_datetime(ExpirationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ExpirationTime, 'HH.mm'))\n| extend\n    ActivationRange = strcat(FormattedStart, \" - \", FormattedExpiration),\n    RequestedHours = datetime_diff('hour', ExpirationTime, StartTime)\n| project User, Role, RoleID, Justification, ActivationRange, RequestedHours, ActivationTime\n| order by ActivationTime desc\n",
+        "size": 4,
+        "title": "Owner Role Activations (High-Impact)",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "showRefreshButton": true,
+        "showExportToExcel": true,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+        ]
+      },
+      "customWidth": "50",
+      "name": "Owner Role Activations (High-Impact)",
+      "styleSettings": {
+        "maxWidth": "50",
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AuditLogs\n| where Category == \"ResourceManagement\"  // Filter for Azure resource activations\n| where OperationName in (\n    \"Add member to role completed (PIM activation)\",\n    \"Add member to role requested (PIM activation)\",\n    \"Remove member from role (PIM activation expired)\"\n)\n| extend \n    User = tostring(parse_json(InitiatedBy.user).displayName),\n    Role = tostring(parse_json(TargetResources[0]).displayName),\n    RoleID = tostring(parse_json(TargetResources[0]).id),\n    Justification = ResultDescription,\n    ActivationTime = TimeGenerated\n// Dynamically extract StartTime and ExpirationTime from AdditionalDetails\n| mv-apply AD = parse_json(AdditionalDetails) on (\n    where AD.key in (\"StartTime\", \"EndTime\", \"ExpirationTime\")\n    | summarize DetailsMap = make_bag(pack(tostring(AD.key), tostring(AD.value)))\n)\n// Use the extracted values\n| extend \n    StartTimeRaw = coalesce(DetailsMap.StartTime, DetailsMap.startTime),\n    ExpirationTimeRaw = coalesce(DetailsMap.EndTime, DetailsMap.ExpirationTime, DetailsMap.endTime, DetailsMap.expirationTime)\n// Convert to datetime\n| extend\n    StartTime = todatetime(StartTimeRaw),\n    ExpirationTime = todatetime(ExpirationTimeRaw)\n// Format dates and times\n| extend\n    FormattedStart = strcat(\"D: \", format_datetime(StartTime, 'dd.MM.yyyy'), \" T: \", format_datetime(StartTime, 'HH.mm')),\n    FormattedExpiration = strcat(\"D: \", format_datetime(ExpirationTime, 'dd.MM.yyyy'), \" T: \", format_datetime(ExpirationTime, 'HH.mm'))\n// Create ActivationRange and calculate RequestedHours\n| extend\n    ActivationRange = strcat(FormattedStart, \" - \", FormattedExpiration),\n    RequestedHours = datetime_diff('hour', ExpirationTime, StartTime)\n// Project final columns\n| project User, Role, RoleID, Justification, ActivationRange, RequestedHours, ActivationTime\n| order by ActivationTime desc\n",
+        "size": 4,
+        "title": "General Azure Resource Activations (Azure Resource Roles)",
+        "timeContext": {
+          "durationMs": 86400000
+        },
+        "showRefreshButton": true,
+        "showExportToExcel": true,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-man-noea-management/providers/Microsoft.OperationalInsights/workspaces/log-man-noea-mgmt-01"
+        ]
+      },
+      "customWidth": "50",
+      "name": "General Azure Resource Activations (Azure Resource Roles)",
+      "styleSettings": {
+        "maxWidth": "50",
+        "showBorder": true
+      }
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/1797e81c-6f4a-489f-af93-fa405ff34713/resourceGroups/rg-prod-noeast-managed-identity/providers/microsoft.monitor/accounts/pam-montior-identity-acitivity"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
